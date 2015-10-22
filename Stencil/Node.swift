@@ -130,13 +130,16 @@ public class ForNode : NodeType {
 
       var emptyNodes = [NodeType]()
 
+      parser.eatNextCRLF() // If CRLF after {% for %}, eat it
       let forNodes = try parser.parse(until(["endfor", "empty"]))
 
       if let token = parser.nextToken() {
         if token.contents == "empty" {
+          parser.eatNextCRLF() // if CRLF after {% empty %}, eat it
           emptyNodes = try parser.parse(until(["endfor"]))
           parser.nextToken()
         }
+        parser.eatNextCRLF() // if CRLF after {% endfor %}, eat it
       } else {
         throw TemplateSyntaxError("`endfor` was not found.")
       }
@@ -178,13 +181,16 @@ public class IfNode : NodeType {
     var trueNodes = [NodeType]()
     var falseNodes = [NodeType]()
 
+    parser.eatNextCRLF() // If CRLF after {% if %}, eat it
     trueNodes = try parser.parse(until(["endif", "else"]))
 
     if let token = parser.nextToken() {
       if token.contents == "else" {
+        parser.eatNextCRLF() // If CRLF after {% else %}, eat it
         falseNodes = try parser.parse(until(["endif"]))
         parser.nextToken()
       }
+      parser.eatNextCRLF() // If CRLF after {% endif %}, eat it
     } else {
       throw TemplateSyntaxError("`endif` was not found.")
     }
@@ -197,13 +203,16 @@ public class IfNode : NodeType {
     var trueNodes = [NodeType]()
     var falseNodes = [NodeType]()
 
+    parser.eatNextCRLF() // If CRLF after {% ifnot %}, eat it
     falseNodes = try parser.parse(until(["endif", "else"]))
 
     if let token = parser.nextToken() {
       if token.contents == "else" {
+        parser.eatNextCRLF() // If CRLF after {% else %}, eat it
         trueNodes = try parser.parse(until(["endif"]))
         parser.nextToken()
       }
+      parser.eatNextCRLF() // If CRLF after {% endif %}, eat it
     } else {
       throw TemplateSyntaxError("`endif` was not found.")
     }

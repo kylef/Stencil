@@ -87,6 +87,13 @@ public class TokenParser {
     return nodes
   }
 
+  public func eatNextCRLF() {
+    if let token = tokens.first, case Token.Text(let text) = token where text.characters.first == "\n" {
+      let strippedText: String = String(text.characters.dropFirst())
+      tokens[0] = Token.Text(value: strippedText)
+    }
+  }
+  
   public func nextToken() -> Token? {
     if tokens.count > 0 {
       return tokens.removeAtIndex(0)

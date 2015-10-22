@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-import Stencil
+@testable import Stencil
 
 
 class ErrorNode : NodeType {
@@ -54,6 +54,28 @@ class RenderNodeTests: NodeTests {
 }
 
 class ForNodeTests: NodeTests {
+  func testParseFor() {
+    let tokens = [
+      Token.Block(value: "for item in items"),
+      .Text(value: "\nan item\n"),
+      .Block(value: "endfor"),
+      .Text(value: "\nthe end\n")
+    ]
+    
+    let parser = TokenParser(tokens: tokens)
+    assertSuccess(try parser.parse()) { nodes in
+      XCTAssertEqual(nodes.count, 2)
+      let forNode = nodes[0] as! ForNode
+      XCTAssertEqual(forNode.variable, Variable("items"))
+      XCTAssertEqual(forNode.loopVariable, "item")
+      XCTAssertEqual(forNode.nodes.count, 1)
+      let loopNode = forNode.nodes[0] as? TextNode
+      XCTAssertEqual(loopNode?.text, "an item\n")
+      let textNode = nodes[1] as! TextNode
+      XCTAssertEqual(textNode.text, "the end\n")
+    }
+  }
+  
   func testForNodeRender() {
     let node = ForNode(variable: "items", loopVariable: "item", nodes: [VariableNode(variable: "item")], emptyNodes:[])
     XCTAssertEqual(try? node.render(context), "123")
@@ -67,9 +89,9 @@ class IfNodeTests: NodeTests {
   func testParseIf() {
     let tokens = [
       Token.Block(value: "if value"),
-      Token.Text(value: "true"),
+      Token.Text(value: "\ntrue"),
       Token.Block(value: "else"),
-      Token.Text(value: "false"),
+      Token.Text(value: "\nfalse"),
       Token.Block(value: "endif")
     ]
 
@@ -91,9 +113,9 @@ class IfNodeTests: NodeTests {
   func testParseIfNot() {
     let tokens = [
       Token.Block(value: "ifnot value"),
-      Token.Text(value: "false"),
+      Token.Text(value: "\nfalse"),
       Token.Block(value: "else"),
-      Token.Text(value: "true"),
+      Token.Text(value: "\ntrue"),
       Token.Block(value: "endif")
     ]
 
