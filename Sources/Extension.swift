@@ -40,6 +40,8 @@ class DefaultExtension: Extension {
 
   fileprivate func registerDefaultTags() {
     registerTag("for", parser: ForNode.parse)
+    registerTag("break", parser: LoopTerminationNode.parse)
+    registerTag("continue", parser: LoopTerminationNode.parse)
     registerTag("if", parser: IfNode.parse)
     registerTag("ifnot", parser: IfNode.parse_ifnot)
 #if !os(Linux)

@@ -7,6 +7,9 @@
 - Added support for resolving superclass properties for not-NSObject subclasses
 - The `{% for %}` tag can now iterate over tuples, structures and classes via
   their stored properties.
+- Added `break` and `continue` tags to break or continue current loop
+- Now you can access outer loop scope by labeling it: `{% outer: for ... %}... {% for ... %} {{ outer.counter }} {% endfor %}{% endfor %}`
+
 
 ### Bug Fixes
 

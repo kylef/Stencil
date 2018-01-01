@@ -23,7 +23,18 @@ public protocol NodeType {
 
 /// Render the collection of nodes in the given context
 public func renderNodes(_ nodes:[NodeType], _ context:Context) throws -> String {
-  return try nodes.map { try $0.render(context) }.joined(separator: "")
+  var renderedNodes = ""
+  for node in nodes {
+    renderedNodes += try node.render(context)
+    
+    let shouldBreak = context[LoopTerminationNode.breakContextKey] != nil
+    let shouldContinue = context[LoopTerminationNode.continueContextKey] != nil
+    
+    if shouldBreak || shouldContinue {
+      break
+    }
+  }
+  return renderedNodes
 }
 
 public class SimpleNode : NodeType {
