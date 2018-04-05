@@ -189,4 +189,72 @@ func testVariable() {
       try expect(result) == 2
     }
   }
+
+  describe("CompoundVariable") {
+    let context = Context(dictionary: [
+      "name": "Kyle",
+      "a": 3,
+      "x": 20
+    ])
+
+    $0.it("Falls back to default behaviour for strings") {
+      let variable = CompoundVariable("\"name\"")
+      let result = try variable.resolve(context) as? String
+      try expect(result) == "name"
+    }
+
+    $0.it("Falls back to default behaviour for numbers") {
+      let variable = CompoundVariable("5")
+      let result = try variable.resolve(context) as? Number
+      try expect(result) == 5
+    }
+
+    $0.it("Falls back to default behaviour for resolvables") {
+      let variable = CompoundVariable("name")
+      let result = try variable.resolve(context) as? String
+      try expect(result) == "Kyle"
+    }
+
+    $0.it("Unresolvables still produce nil") {
+      let variable = CompoundVariable("something")
+      let result = try variable.resolve(context)
+      try expect(result).to.beNil()
+    }
+
+    $0.it("Can add two numbers") {
+      let variable = CompoundVariable("1 + 2")
+      let result = try variable.resolve(context) as? Number
+      try expect(result) == 3
+    }
+
+    $0.it("Can substract two numbers") {
+      let variable = CompoundVariable("2 - 4")
+      let result = try variable.resolve(context) as? Number
+      try expect(result) == -2
+    }
+
+    $0.it("Can multiply two numbers") {
+      let variable = CompoundVariable("-2 * -4")
+      let result = try variable.resolve(context) as? Number
+      try expect(result) == 8
+    }
+
+    $0.it("Can divide two numbers") {
+      let variable = CompoundVariable("4 / 2")
+      let result = try variable.resolve(context) as? Number
+      try expect(result) == 2
+    }
+
+    $0.it("Can resolve variables") {
+      let variable = CompoundVariable("a * x")
+      let result = try variable.resolve(context) as? Number
+      try expect(result) == 60
+    }
+
+    $0.it("Can process a complex expression") {
+      let variable = CompoundVariable("1 + 2 * 3 - (4 + 6) / 5")
+      let result = try variable.resolve(context) as? Number
+      try expect(result) == 5
+    }
+  }
 }

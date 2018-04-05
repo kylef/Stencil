@@ -3,6 +3,14 @@ import Foundation
 
 typealias Number = Float
 
+public protocol GenericVariable: Equatable {
+  var variable: String { get }
+}
+
+public func ==<T: GenericVariable>(lhs: T, rhs: T) -> Bool {
+  return lhs.variable == rhs.variable
+}
+
 
 class FilterExpression : Resolvable {
   let filters: [(FilterType, [Variable])]
@@ -41,8 +49,66 @@ class FilterExpression : Resolvable {
   }
 }
 
+// A structure used to represent a template variable or expression, resolved in
+// a given context
+public struct CompoundVariable : GenericVariable, Resolvable {
+  public let variable: String
+
+  /// Create a variable with a string representing the variable
+  public init(_ variable: String) {
+    self.variable = variable
+  }
+
+  /// Resolve the variable in the given context, first as a normal variable, then
+  /// as an expression (more expensive)
+  public func resolve(_ context: Context) throws -> Any? {
+    var result = try Variable(variable).resolve(context)
+
+    if result == nil {
+      result = try expressionResolve(context)
+    }
+
+    return result
+  }
+
+  private func expressionResolve(_ context: Context) throws -> Any? {
+    var components = explode(expression: variable, operators: " +-*/()")
+
+    // try to resolve each individual component
+    components = try components.map {
+      if let resolved = try Variable($0).resolve(context) {
+        return stringify(resolved)
+      } else {
+        return $0
+      }
+    }
+
+    let expression = NSExpression(format: components.joined())
+    return expression.expressionValue(with: nil, context: nil)
+  }
+  
+  private func explode(expression: String, operators: String) -> [String] {
+    let set = CharacterSet(charactersIn: operators)
+    var result = [String]()
+    
+    var current = ""
+    for character in expression.unicodeScalars {
+      if !set.contains(character) {
+        current += String(character)
+      } else {
+        result.append(current)
+        result.append(String(character))
+        current = ""
+      }
+    }
+    result.append(current)
+
+    return result.filter { !$0.isEmpty }
+  }
+}
+
 /// A structure used to represent a template variable, and to resolve it in a given context.
-public struct Variable : Equatable, Resolvable {
+public struct Variable : GenericVariable, Resolvable {
   public let variable: String
 
   /// Create a variable with a string representing the variable
@@ -124,10 +190,6 @@ public struct Variable : Equatable, Resolvable {
 
     return normalize(current)
   }
-}
-
-public func ==(lhs: Variable, rhs: Variable) -> Bool {
-  return lhs.variable == rhs.variable
 }
 
 
