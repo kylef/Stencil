@@ -155,7 +155,9 @@ class BlockNode : NodeType {
       }
     }
 
-    return try renderNodes(nodes, context)
+    let result = try renderNodes(nodes, context)
+    context.cacheBlock(name, content: result)
+    return result
   }
 
   // child node is a block node from child template that extends this node (has the same name)

@@ -13,6 +13,9 @@
 - Now requires Swift 4.1 or newer.  
   [Yonas Kolb](https://github.com/yonaskolb)
   [#228](https://github.com/stencilproject/Stencil/pull/228)
+- Blocks now can be used repeatedly in the template. When block is rendered for the first time its content will be cached and it can be rendered again later using `{{ block.block_name }}`.  
+  [Ilya Puchka](https://github.com/ilyapuchka)
+  [#182](https://github.com/stencilproject/Stencil/pull/182)
 
 ### New Features
 

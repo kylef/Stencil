@@ -129,7 +129,7 @@ Let's take a look at an example. Here is our base template (``base.html``):
     </html>
 
 This example declares three blocks, ``title``, ``sidebar`` and ``content``. We
-can use the ``{% extends %}`` template tag to inherit from out base template
+can use the ``{% extends %}`` template tag to inherit from our base template
 and then use ``{% block %}`` to override any blocks from our base template.
 
 A child template might look like the following:
@@ -183,3 +183,5 @@ inheritance is the following three-level approach:
   extend ``base.html`` and include section-specific styles/design.
 * Create individual templates for each type of page, such as a news article or
   blog entry. These templates extend the appropriate section template.
+
+You can render block's content more than once buy using ``{{ block.name }}`` after block is defined.
