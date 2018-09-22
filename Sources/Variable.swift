@@ -39,6 +39,19 @@ class FilterExpression : Resolvable {
   }
 }
 
+public protocol DynamicMemberLookup {
+  subscript(dynamicMember member: String) -> Any? { get }
+}
+
+extension DynamicMemberLookup where Self: RawRepresentable {
+  subscript(dynamicMember member: String) -> Any? {
+    switch member {
+    case "rawValue": return rawValue
+    default: return nil
+    }
+  }
+}
+
 /// A structure used to represent a template variable, and to resolve it in a given context.
 public struct Variable : Equatable, Resolvable {
   public let variable: String
@@ -99,9 +112,13 @@ public struct Variable : Equatable, Resolvable {
           }
         #endif
       } else if let value = current {
-        current = Mirror(reflecting: value).getValue(for: bit)
-        if current == nil {
-          return nil
+        if let value = (current as? DynamicMemberLookup)?[dynamicMember: bit] {
+          current = value
+        } else {
+          current = Mirror(reflecting: value).getValue(for: bit)
+          if current == nil {
+            return nil
+          }
         }
       } else {
         return nil

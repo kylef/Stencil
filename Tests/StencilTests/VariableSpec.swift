@@ -186,6 +186,15 @@ func testVariable() {
       try expect(result) == "Kyle"
     }
 
+    $0.it("can resolve rawValue") {
+      enum SomeEnum: String, DynamicMemberLookup {
+        case someValue = "this is raw value"
+      }
+      let variable = Variable("enum.rawValue")
+      let result = try variable.resolve(Context(dictionary: ["enum": SomeEnum.someValue])) as? String
+      try expect(result) == "this is raw value"
+    }
+
 #if os(OSX)
     $0.it("can resolve a value via KVO") {
       let variable = Variable("object.title")
