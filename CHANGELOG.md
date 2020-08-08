@@ -28,6 +28,10 @@ _None_
   [Ilya Puchka](https://github.com/ilyapuchka)
   [#263](https://github.com/stencilproject/Stencil/pull/263)
 
+- Fixed using `{{ block.super }}` inside nodes other than `block`.  
+  [Ilya Puchka](https://github.com/ilyapuchka)
+  [#267](https://github.com/stencilproject/Stencil/pull/267)
+
 ### Internal Changes
 
 - `Token` type converted to struct to allow computing token components only once.  

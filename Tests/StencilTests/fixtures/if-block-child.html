@@ -1,0 +1,2 @@
+{% extends "if-block.html" %}
+{% block title %}{% if sort == "new" %}{{ block.super }} - Nieuwste spellen{% elif sort == "upcoming" %}{{ block.super }} - Binnenkort op de agenda{% elif sort == "near-me" %}{{ block.super }} - In mijn buurt{% endif %}{% endblock %}

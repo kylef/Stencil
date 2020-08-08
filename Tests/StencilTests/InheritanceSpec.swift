@@ -32,5 +32,24 @@ final class InheritanceTests: XCTestCase {
         Child_Body
         """
     }
+
+    it("can render block.super in if tag") {
+      let template = try self.environment.loadTemplate(name: "if-block-child.html")
+
+      try expect(try template.render(["sort": "new"])) == """
+      Title - Nieuwste spellen
+
+      """
+
+      try expect(try template.render(["sort": "upcoming"])) == """
+      Title - Binnenkort op de agenda
+
+      """
+
+      try expect(try template.render(["sort": "near-me"])) == """
+      Title - In mijn buurt
+
+      """
+    }
   }
 }

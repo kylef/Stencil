@@ -318,7 +318,7 @@ final class EnvironmentBaseAndChildTemplateTests: XCTestCase {
     baseTemplate = try environment.loadTemplate(name: "invalid-base.html")
 
     try expectError(reason: "filter error",
-                    childToken: "block.super",
+                    childToken: "extends \"invalid-base.html\"",
                     baseToken: "target|unknown")
   }
 

@@ -141,7 +141,10 @@ class BlockNode: NodeType {
 
   func render(_ context: Context) throws -> String {
     if let blockContext = context[BlockContext.contextKey] as? BlockContext, let child = blockContext.pop(name) {
-      let childContext = try self.childContext(child, blockContext: blockContext, context: context)
+
+      var childContext: [String: Any] = [BlockContext.contextKey: blockContext]
+      childContext["block"] = ["super": try self.render(context)]
+
       // render extension node
       do {
         return try context.push(dictionary: childContext) {
@@ -153,37 +156,6 @@ class BlockNode: NodeType {
     }
 
     return try renderNodes(nodes, context)
-  }
-
-  // child node is a block node from child template that extends this node (has the same name)
-  func childContext(_ child: BlockNode, blockContext: BlockContext, context: Context) throws -> [String: Any] {
-    var childContext: [String: Any] = [BlockContext.contextKey: blockContext]
-
-    if let blockSuperNode = child.nodes.first(where: {
-      if let token = $0.token, case .variable = token.kind, token.contents == "block.super" {
-        return true
-      } else {
-        return false
-      }
-    }) {
-      do {
-        // render base node so that its content can be used as part of child node that extends it
-        childContext["block"] = ["super": try self.render(context)]
-      } catch {
-        if let error = error as? TemplateSyntaxError {
-          throw TemplateSyntaxError(
-            reason: error.reason,
-            token: blockSuperNode.token,
-            stackTrace: error.allTokens)
-        } else {
-          throw TemplateSyntaxError(
-            reason: "\(error)",
-            token: blockSuperNode.token,
-            stackTrace: [])
-        }
-      }
-    }
-    return childContext
   }
 
 }
