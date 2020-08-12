@@ -60,5 +60,25 @@ final class TokenParserTests: XCTestCase {
         token: tokens.first)
       )
     }
+
+    it("transforms WhitespaceBehavior to TrimBehaviour") {
+
+      let simpleExtension = Extension()
+      simpleExtension.registerSimpleTag("known") { _ in
+        return ""
+      }
+
+      let parser = TokenParser(tokens: [
+        Token.block(value: "known", at: .unknown, whitespace: WhitespaceBehavior(leading: .unspecified, trailing: .trim)),
+        Token.text(value: "      \nSome text     ", at: .unknown),
+        Token.block(value: "known", at: .unknown, whitespace: WhitespaceBehavior(leading: .keep, trailing: .trim))
+      ], environment: Environment(extensions: [simpleExtension]))
+
+      let nodes = try parser.parse()
+      try expect(nodes.count) == 3
+      let textNode = nodes[1] as? TextNode
+      try expect(textNode?.text) == "      \nSome text     "
+      try expect(textNode?.trimBehavior) == TrimBehavior(leading: .whitespaceAndNewLines, trailing: .none)
+    }
   }
 }

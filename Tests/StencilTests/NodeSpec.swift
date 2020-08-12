@@ -25,6 +25,41 @@ final class NodeTests: XCTestCase {
       let node = TextNode(text: "Hello World")
       try expect(try node.render(self.context)) == "Hello World"
     }
+    it("Trims leading whitespace") {
+      let text = "      \n Some text     "
+        let node = TextNode(text: text, trimBehavior: TrimBehavior(leading: .whitespace, trailing: .none))
+        try expect(try node.render(self.context)) == "\n Some text     "
+    }
+    it("Trims leading whitespace and one newline") {
+      let text = "\n\n Some text     "
+        let node = TextNode(text: text, trimBehavior: TrimBehavior(leading: .whitespaceAndOneNewLine, trailing: .none))
+        try expect(try node.render(self.context)) == "\n Some text     "
+    }
+    it("Trims leading whitespace and one newline") {
+      let text = "\n\n Some text     "
+        let node = TextNode(text: text, trimBehavior: TrimBehavior(leading: .whitespaceAndNewLines, trailing: .none))
+        try expect(try node.render(self.context)) == "Some text     "
+    }
+    it("Trims trailing whitespace") {
+      let text = "      Some text     \n"
+        let node = TextNode(text: text, trimBehavior: TrimBehavior(leading: .none, trailing: .whitespace))
+      try expect(try node.render(self.context)) == "      Some text\n"
+    }
+    it("Trims trailing whitespace and one newline") {
+      let text = "      Some text     \n \n "
+        let node = TextNode(text: text, trimBehavior: TrimBehavior(leading: .none, trailing: .whitespaceAndOneNewLine))
+      try expect(try node.render(self.context)) == "      Some text     \n "
+    }
+    it("Trims trailing whitespace and newlines") {
+      let text = "      Some text     \n \n "
+        let node = TextNode(text: text, trimBehavior: TrimBehavior(leading: .none, trailing: .whitespaceAndNewLines))
+      try expect(try node.render(self.context)) == "      Some text"
+    }
+    it("Trims all whitespace") {
+      let text = "    \n  \nSome text \n    "
+        let node = TextNode(text: text, trimBehavior: TrimBehavior(leading: .whitespaceAndNewLines, trailing: .whitespaceAndNewLines))
+      try expect(try node.render(self.context)) == "Some text"
+    }
   }
 
   func testVariableNode() {

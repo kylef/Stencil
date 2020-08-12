@@ -11,6 +11,8 @@ struct Lexer {
   /// `{` character, for example `{{`, `{%`, `{#`, ...
   private static let tokenChars: [Unicode.Scalar] = ["{", "%", "#"]
 
+  private static let tagLength = 2
+
   /// The token end characters, corresponding to their token start characters.
   /// For example, a variable token starts with `{{` and ends with `}}`
   private static let tokenCharMap: [Unicode.Scalar: Unicode.Scalar] = [
@@ -30,6 +32,24 @@ struct Lexer {
     }
   }
 
+  private func whiteSpaceBehavior(string: String, tagLength: Int) -> WhitespaceBehavior {
+    func behavior(string: String) -> WhitespaceBehavior.Behavior {
+      switch string {
+      case "+": return .keep
+      case "-": return .trim
+      default: return .unspecified
+      }
+    }
+    let leftIndex = string.index(string.startIndex, offsetBy: tagLength, limitedBy: string.endIndex)
+    let rightIndex = string.index(string.endIndex, offsetBy: -(tagLength + 1), limitedBy: string.startIndex)
+    let leftIndicator = leftIndex.map { ind in String(string[ind...ind]) }
+    let rightIndicator = rightIndex.map { ind in String(string[ind...ind]) }
+    return WhitespaceBehavior(
+      leading: behavior(string: leftIndicator ?? ""),
+      trailing: behavior(string: rightIndicator ?? "")
+    )
+  }
+
   /// Create a token that will be passed on to the parser, with the given
   /// content and a range. The content will be tested to see if it's a
   /// `variable`, a `block` or a `comment`, otherwise it'll default to a simple
@@ -40,9 +60,9 @@ struct Lexer {
   ///   - range: The range within the template content, used for smart
   ///            error reporting
   func createToken(string: String, at range: Range<String.Index>) -> Token {
-    func strip() -> String {
+    func strip(length: (Int, Int) = (Lexer.tagLength, Lexer.tagLength)) -> String {
       guard string.count > 4 else { return "" }
-      let trimmed = String(string.dropFirst(2).dropLast(2))
+      let trimmed = String(string.dropFirst(length.0).dropLast(length.1))
         .components(separatedBy: "\n")
         .filter { !$0.isEmpty }
         .map { $0.trim(character: " ") }
@@ -50,8 +70,29 @@ struct Lexer {
       return trimmed
     }
 
+    func additionalTagLength(_ behaviour: WhitespaceBehavior.Behavior) -> Int {
+      switch behaviour {
+      case .keep, .trim:
+        return 1
+      case .unspecified:
+        return 0
+      }
+    }
+
     if string.hasPrefix("{{") || string.hasPrefix("{%") || string.hasPrefix("{#") {
-      let value = strip()
+
+      var stripLengths = (Lexer.tagLength, Lexer.tagLength)
+      var behavior: WhitespaceBehavior = .unspecified
+
+      if string.hasPrefix("{%") {
+        behavior = whiteSpaceBehavior(string: string, tagLength: Lexer.tagLength)
+        stripLengths = (
+          Lexer.tagLength + additionalTagLength(behavior.leading),
+          Lexer.tagLength +  additionalTagLength(behavior.trailing)
+        )
+      }
+
+      let value = strip(length: stripLengths)
       let range = templateString.range(of: value, range: range) ?? range
       let location = rangeLocation(range)
       let sourceMap = SourceMap(filename: templateName, location: location)
@@ -59,7 +100,7 @@ struct Lexer {
       if string.hasPrefix("{{") {
         return .variable(value: value, at: sourceMap)
       } else if string.hasPrefix("{%") {
-        return .block(value: value, at: sourceMap)
+        return .block(value: strip(length: stripLengths), at: sourceMap, whitespace: behavior)
       } else if string.hasPrefix("{#") {
         return .comment(value: value, at: sourceMap)
       }

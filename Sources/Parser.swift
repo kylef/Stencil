@@ -16,6 +16,7 @@ public class TokenParser {
 
   fileprivate var tokens: [Token]
   fileprivate let environment: Environment
+  fileprivate var previousWhiteSpace: WhitespaceBehavior.Behavior?
 
   public init(tokens: [Token], environment: Environment) {
     self.tokens = tokens
@@ -35,10 +36,29 @@ public class TokenParser {
 
       switch token.kind {
       case .text:
-        nodes.append(TextNode(text: token.contents))
+
+        var trimBehavior = TrimBehavior.none
+        if let leading = previousWhiteSpace {
+          if leading == .unspecified {
+            trimBehavior.leading = environment.trimBehavior.trailing
+          } else {
+            trimBehavior.leading = leading == .trim ? .whitespaceAndNewLines : .none
+          }
+        }
+        if let trailing = peekWhitespace() {
+          if trailing == .unspecified {
+            trimBehavior.trailing = environment.trimBehavior.leading
+          } else {
+            trimBehavior.trailing = trailing == .trim ? .whitespaceAndNewLines : .none
+          }
+        }
+
+        nodes.append(TextNode(text: token.contents, trimBehavior: trimBehavior))
       case .variable:
+        previousWhiteSpace = nil
         try nodes.append(VariableNode.parse(self, token: token))
       case .block:
+        previousWhiteSpace = token.whitespace?.trailing
         if let parseUntil = parseUntil, parseUntil(self, token) {
           prependToken(token)
           return nodes
@@ -54,6 +74,7 @@ public class TokenParser {
           }
         }
       case .comment:
+        previousWhiteSpace = nil
         continue
       }
     }
@@ -67,6 +88,10 @@ public class TokenParser {
     }
 
     return nil
+  }
+
+  func peekWhitespace() -> WhitespaceBehavior.Behavior? {
+    return tokens.first?.whitespace?.leading
   }
 
   public func prependToken(_ token: Token) {

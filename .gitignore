@@ -3,3 +3,4 @@
 Packages/
 Package.pins
 *.xcodeproj
+.swiftpm

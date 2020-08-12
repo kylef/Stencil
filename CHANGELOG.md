@@ -14,6 +14,14 @@
 , i.e. `myfilter = "uppercase"` and then use it to invoke this filter with `{{ string|filter:myfilter }}`.  
   [Ilya Puchka](https://github.com/ilyapuchka)
   [#203](https://github.com/stencilproject/Stencil/pull/203)
+- Added support for trimming whitespace around blocks with Jinja2 whitespace control symbols. eg `{%- if value +%}`  
+  [Miguel Bejar](https://github.com/bejar37)
+  [#287](https://github.com/stencilproject/Stencil/pull/287)  
+  [Yonas Kolb](https://github.com/yonaskolb)
+  [#287](https://github.com/stencilproject/Stencil/pull/287)
+- Added support for adding default whitespace trimming behavior to an environment.  
+  [Yonas Kolb](https://github.com/yonaskolb)
+  [#287](https://github.com/stencilproject/Stencil/pull/287)
 
 ### Deprecations
 

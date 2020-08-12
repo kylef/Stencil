@@ -103,6 +103,19 @@ final class LexerTests: XCTestCase {
     try expect(tokens[4]) == Token.text(value: ".", at: makeSourceMap(".", for: lexer))
   }
 
+  func testTrimSymbols() throws {
+
+    let fBlock = "if hello"
+    let sBlock = "ta da"
+    let lexer = Lexer(templateString: "{%+ \(fBlock) -%}{% \(sBlock) -%}")
+    let tokens = lexer.tokenize()
+    let whitespaceBehaviors = (WhitespaceBehavior(leading: .keep, trailing: .trim), WhitespaceBehavior(leading: .unspecified, trailing: .trim))
+
+    try expect(tokens.count) == 2
+    try expect(tokens[0]) == Token.block(value: fBlock, at: makeSourceMap(fBlock, for: lexer), whitespace: whitespaceBehaviors.0)
+    try expect(tokens[1]) == Token.block(value: sBlock, at: makeSourceMap(sBlock, for: lexer), whitespace: whitespaceBehaviors.1)
+  }
+
   func testEscapeSequence() throws {
     let templateString = "class Some {{ '{' }}{% if true %}{{ stuff }}{% endif %}"
     let lexer = Lexer(templateString: templateString)
