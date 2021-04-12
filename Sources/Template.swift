@@ -73,8 +73,12 @@ open class Template: ExpressibleByStringLiteral {
   }
 
   // swiftlint:disable discouraged_optional_collection
-  /// Render the given template
   open func render(_ dictionary: [String: Any]? = nil) throws -> String {
     return try render(Context(dictionary: dictionary ?? [:], environment: environment))
+  }
+
+  /// Render the given template
+  open func render(object: Any?) throws -> String {
+    return try render(Context(object: object, environment: environment))
   }
 }

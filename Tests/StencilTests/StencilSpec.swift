@@ -44,7 +44,7 @@ final class StencilTests: XCTestCase {
       ]
 
       let template = Template(templateString: templateString)
-      let result = try template.render(context)
+      let result = try template.render(object: context)
 
       try expect(result) == """
         There are 2 articles.

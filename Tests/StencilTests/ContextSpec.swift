@@ -88,4 +88,32 @@ final class ContextTests: XCTestCase {
       }
     }
   }
+    
+  func testContextAnyInitialization() {
+    class SuperTest {
+      init() {}
+      let int : Int = 23
+    }
+    class Test : SuperTest {
+      override init() {
+        super.init()
+      }
+      let string : String = "test string"
+      let optional : String? = "test optional"
+      let nilOptional : String? = nil
+    }
+    describe("Any Initialization") {
+      var context = Context()
+      $0.before {
+        context = Context(object: Test())
+      }
+    
+      $0.it("Test dictionary values") {
+        try expect(context["int"] as? Int) == 23
+        try expect(context["string"] as? String) == "test string"
+        try expect(context["optional"] as? String)  == "test optional"
+        try expect(context["nilOptional"] == nil) == true
+      }
+    }
+  }
 }

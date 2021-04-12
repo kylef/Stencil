@@ -442,7 +442,7 @@ private class ExampleLoader: Loader {
 
 private class CustomTemplate: Template {
   // swiftlint:disable discouraged_optional_collection
-  override func render(_ dictionary: [String: Any]? = nil) throws -> String {
+  override func render(object: Any? = nil) throws -> String {
     return "here"
   }
 }
